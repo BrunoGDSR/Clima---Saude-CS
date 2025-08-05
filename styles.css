@@ -1,0 +1,284 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;0,600&display=swap');
+* {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-image: url('src/images/backgroungPesquisa.jpg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-image 0.5s ease-in-out;
+}
+
+#container {
+    background-color: #f0f8ff;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
+}
+#search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #bdbdbd;
+    border-radius: 10px;
+    padding: 4px 12px;
+    margin-bottom: 20px;
+}
+#search input {
+    border: none;
+    background-color: transparent;
+    font-size: 16px;
+    width: 100%;
+}
+#search input:focus-visible {
+    outline: none;
+}
+
+#search button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #3b82f6;
+}
+#weather {
+    display: none;
+}
+#weather.show {
+    display: block;
+}
+#weather #title {
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #372f3f;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px; 
+}
+
+
+#weather #title #country_flag_img {
+    height: 40px;
+    vertical-align: middle;
+
+}
+
+
+#weather_details_and_recommendations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#infos {
+    flex: 1;
+    min-width: 300px;
+}
+
+#temp {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 20px;
+    background: linear-gradient(90deg, #5a7cdc, #606dde);
+    color: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+#temp_img {
+    filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2));
+    width: 80px;
+    height: 80px;
+}
+#temp_value {
+    font-weight: bold;
+    font-size: 50px;
+    line-height: 55px;
+}
+
+#temp_description {
+    font-weight: 500;
+    text-transform: capitalize;
+    font-size: 18px;
+}
+#other_infos {
+    margin-top: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+#other_infos .info {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+    gap: 10px;
+}
+
+#other_infos .info h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+}
+#other_infos .info p {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+}
+#other_infos .info i {
+    text-align: center;
+    font-size: 24px;
+    width: 25%;
+}
+#temp_max_icon {
+    color: #dc2626;
+}
+#temp_min_icon {
+    color: #0284c7;
+}
+
+#humidity_icon {
+    color: #0ea5e9;
+}
+#wind_icon {
+    color: #7c3aed;
+}
+
+
+#air_quality_icon {
+    color: #6b7280;
+}
+
+
+#uv_index_icon {
+    color: #6b7280;
+}
+
+
+#health_recommendations {
+    flex: 1;
+    min-width: 300px;
+    padding: 15px;
+    background-color: #e0f2f7;
+    border-radius: 10px;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+#health_recommendations h2 {
+    font-size: 18px;
+    color: #2a6496;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#health_recommendations ul {
+    list-style: none;
+    padding: 0;
+}
+
+#health_recommendations ul li {
+    font-size: 15px;
+    color: #444;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.4;
+}
+
+#health_recommendations ul li::before {
+    content: "\2022";
+    color: #3b82f6;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+
+#alert {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    color: #dc2626;
+    font-weight: 500;
+    text-align: center;
+}
+#alert img {
+    width: 180px;
+    margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+    #weather_details_and_recommendations {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #infos, #health_recommendations {
+        min-width: auto;
+        width: 100%;
+    }
+    #container {
+        max-width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    #container {
+        padding: 10px;
+    }
+    #temp {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+        padding: 15px;
+    }
+    #temp_value {
+        font-size: 40px;
+        line-height: 45px;
+    }
+    #temp_img {
+        width: 60px;
+        height: 60px;
+    }
+    #other_infos {
+        grid-template-columns: 1fr;
+    }
+    #other_infos .info {
+        justify-content: center;
+        padding: 8px 10px;
+    }
+    #other_infos .info h2 {
+        font-size: 12px;
+    }
+    #other_infos .info p {
+        font-size: 14px;
+    }
+    #health_recommendations h2 {
+        font-size: 16px;
+    }
+    #health_recommendations ul li {
+        font-size: 13px;
+    }
+}
