@@ -1,3 +1,150 @@
+import { auth, db } from './firebase-config.js'; 
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+
+const userEmailSpan = document.querySelector('#user-email');
+const loginBtn = document.querySelector('#login-btn');
+const registerBtn = document.querySelector('#register-btn');
+const logoutBtn = document.querySelector('#logout-btn');
+const saveCityBtn = document.querySelector('#save-city-btn');
+const savedCitiesSection = document.querySelector('#saved-cities');
+const savedCitiesList = document.querySelector('#saved-cities-list');
+
+let currentUser = null; 
+let isCityLoadedSuccessfully = false;
+
+onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if (user) {
+        userEmailSpan.textContent = 'Olá, seja bem-vindo novamente!';
+        loginBtn.style.display = 'none';
+        registerBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
+        saveCityBtn.style.display = 'block'; 
+        savedCitiesSection.style.display = 'block'; 
+        loadSavedCities(user.uid); 
+    } else {
+        userEmailSpan.textContent = '';
+        loginBtn.style.display = 'inline-block';
+        registerBtn.style.display = 'inline-block';
+        logoutBtn.style.display = 'none';
+        saveCityBtn.style.display = 'none'; 
+        savedCitiesSection.style.display = 'none'; 
+        savedCitiesList.innerHTML = '';
+        isCityLoadedSuccessfully = false; 
+    }
+});
+
+logoutBtn.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        showAlert('Você foi desconectado.');
+        document.querySelector("#weather").classList.remove('show'); 
+        isCityLoadedSuccessfully = false;
+    } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+        showAlert('Erro ao fazer logout.');
+    }
+});
+
+
+saveCityBtn.addEventListener('click', async () => {
+    if (!currentUser) {
+        showAlert('Você precisa estar logado para salvar cidades.');
+        return;
+    }
+
+    if (!isCityLoadedSuccessfully) {
+        showAlert('Busque uma cidade antes de tentar salvar.');
+        return;
+    }
+
+    const cityName = document.querySelector('#city_name_display').textContent;
+  
+    if (!cityName || cityName.trim() === '') {
+        showAlert('Nome da cidade inválido para salvar.');
+        return;
+    }
+
+    try {
+
+        const q = query(collection(db, "savedCities"),
+                        where("userId", "==", currentUser.uid),
+                        where("cityName", "==", cityName));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            showAlert(`A cidade "${cityName}" já está salva.`);
+            return;
+        }
+
+        await addDoc(collection(db, "savedCities"), {
+            userId: currentUser.uid,
+            cityName: cityName,
+            timestamp: new Date()
+        });
+        showAlert(`"${cityName}" salva com sucesso!`);
+        loadSavedCities(currentUser.uid); // Recarrega a lista de cidades salvas
+    } catch (e) {
+        console.error("Erro ao salvar cidade: ", e);
+        showAlert("Erro ao salvar cidade.");
+    }
+});
+
+
+async function loadSavedCities(userId) {
+    savedCitiesList.innerHTML = ''; 
+    try {
+        const q = query(collection(db, "savedCities"), where("userId", "==", userId));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            savedCitiesList.innerHTML = '<li>Nenhuma cidade salva ainda.</li>';
+            return;
+        }
+
+        querySnapshot.forEach((doc) => {
+            const cityData = doc.data();
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <span>${cityData.cityName}</span>
+                <button class="load-city-btn" data-city="${cityData.cityName}">Ver Clima</button>
+                <button class="delete-city-btn" data-id="${doc.id}">Excluir</button>
+            `;
+            savedCitiesList.appendChild(listItem);
+        });
+
+        document.querySelectorAll('.load-city-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const cityToLoad = e.target.dataset.city;
+                document.querySelector('#city_name').value = cityToLoad;
+                document.querySelector('#search').dispatchEvent(new Event('submit'));
+            });
+        });
+
+        document.querySelectorAll('.delete-city-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const docId = e.target.dataset.id;
+                try {
+                    await deleteDoc(doc(db, "savedCities", docId));
+                    showAlert('Cidade excluída com sucesso!');
+                    loadSavedCities(userId); // Recarrega a lista
+                } catch (error) {
+                    console.error("Erro ao excluir cidade:", error);
+                    showAlert('Erro ao excluir cidade.');
+                }
+            });
+        });
+
+    } catch (e) {
+        console.error("Erro ao carregar cidades salvas: ", e);
+        savedCitiesList.innerHTML = '<li>Erro ao carregar cidades.</li>';
+    }
+}
+
+
 document.querySelector('#search').addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -6,6 +153,7 @@ document.querySelector('#search').addEventListener('submit', async (event) => {
     if (!cityName) {
         document.querySelector("#weather").classList.remove('show');
         showAlert('Você precisa digitar uma cidade...');
+        isCityLoadedSuccessfully = false; 
         return;
     }
 
@@ -29,8 +177,6 @@ document.querySelector('#search').addEventListener('submit', async (event) => {
             coord: json.coord,
             visibility: json.visibility
         });
-
-        fetchCityImage(cityName);
     } else {
         document.querySelector("#weather").classList.remove('show');
         showAlert(`
@@ -40,6 +186,7 @@ document.querySelector('#search').addEventListener('submit', async (event) => {
         `);
 
         document.body.style.backgroundImage = 'none';
+        isCityLoadedSuccessfully = false;
     }
 });
 
@@ -327,4 +474,6 @@ async function showInfo(json){
     } else {
         recommendationsList.innerHTML = '<li>Nenhuma recomendação de saúde específica para as condições atuais.</li>';
     }
+
+    isCityLoadedSuccessfully = true; 
 }
